@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "b7voywGHf9vj9jQS2JAuciWo3M4vFd+pmkdHEv8tFl5OIdTRApAeXtwr2EvnYFKGKk9qMrBIVCjFoqQRQ/Af8Q==",
+  "dgSpecHash": "wPnh7R7/xIWgptkj6IlfxdtMPRYOdibwyQEo819VEjAYpv31a2Y59T8kiBp9FRMFQ1ZZfuvGivW94o7S/oMZOg==",
   "success": true,
-  "projectFilePath": "c:\\Users\\chong\\Downloads\\project\\TestProject\\TestProject.csproj",
+  "projectFilePath": "C:\\Users\\chong\\Downloads\\project\\TestProject\\TestProject.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }
