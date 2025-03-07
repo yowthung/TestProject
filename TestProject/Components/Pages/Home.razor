@@ -1,0 +1,151 @@
+﻿@page "/home"
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@inject HttpClient Client
+ 
+<PageTitle>Home</PageTitle>
+
+<h1></h1>
+
+
+
+
+@if (getBranchesError || branches is null)
+{
+    <p>Unable to get branches from GitHub. Please try again later.</p>
+}
+else
+{
+   <table style="border: 2px solid black; border-left: 2px solid black; border-right: 2px solid black;">
+     <th style="border: 2px solid black; border-left: 2px solid black; border-right: 2px solid black;">Currency</th>           
+         <th style="border: 2px solid black; border-left: 2px solid black; border-right: 2px solid black;">Rate</th>
+         <th style="border: 2px solid black; border-left: 2px solid black; border-right: 2px solid black;">Rate + 10.0002</th>
+    @foreach (var branch in branches.rates)
+    {       
+    <tr>  
+          @if(@branch.Key == "HKD")
+        {
+          <td style="border: 2px solid red; border-left: 2px solid red; border-right: 2px solid red;">                                  
+                        @branch.Key          
+        </td>  
+        }else
+        {
+        <td style="border: 2px solid black; border-left: 2px solid black; border-right: 2px solid black;">                                  
+                        @branch.Key          
+        </td>  
+        }   
+       
+        @if(CheckEvenNumber(@branch.Value) || @branch.Key == "HKD")     
+        {     
+            <td style="border: 2px solid red; border-left: 2px solid red; border-right: 2px solid red;">                                 
+                            @branch.Value          
+            </td>
+        }else{
+             <td style="border: 2px solid black; border-left: 2px solid black; border-right: 2px solid black;">                                  
+                        @branch.Value          
+             </td>
+        }
+        @{
+                modify_rates[branch.Key] += 10.0002; 
+        } 
+        @if(CheckEvenNumber(modify_rates[branch.Key]) || @branch.Key == "HKD")     
+        {      
+            <td style="border: 2px solid red; border-left: 2px solid red; border-right: 2px solid red;">
+                
+                @modify_rates[branch.Key]
+            </td>
+         }else{
+            <td style="border: 2px solid black; border-left: 2px solid black; border-right: 2px solid black;">             
+                @modify_rates[branch.Key]
+            </td>
+         }
+   </tr>
+   }
+   </table>
+}
+
+
+@code {
+    private GitHubBranch branches = null;
+
+    private Dictionary<string, double> modify_rates { get; set; }
+       
+    private bool getBranchesError;
+    //private bool shouldRender;
+
+    //protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get,
+            "https://api.apilayer.com/fixer/latest");
+        request.Headers.Add("apikey", "9sOx2d1gWYZrKY0uD4hCbOMIQzLcL4KQ");
+      
+
+        var response = await Client.SendAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            @* using var responseStream = await response.Content.ReadAsStreamAsync();
+            branches = await JsonSerializer.DeserializeAsync
+                <IEnumerable<GitHubBranch>>(responseStream); *@
+                     branches = await response.Content.ReadFromJsonAsync<GitHubBranch>();
+
+                        if(branches != null)
+                        {
+                             if(branches.rates != null)
+                             {
+                               modify_rates =  branches.rates;
+                               foreach(var key in branches.rates.Keys)
+                               {
+                                  modify_rates[key] =  modify_rates[key] + 10.0002;
+                               }
+                             }
+
+                        }
+        }
+        else
+        {
+            getBranchesError = true;
+        }
+
+        //shouldRender = true;
+    }
+
+    protected bool CheckEvenNumber(double value)
+    {
+        //bool isEvenNumber = false;
+
+        try{
+             if(value%2 == 0)
+             {
+                  return true;
+             }else{
+                return false;
+             }
+
+        }catch(Exception ex)
+        {
+            return false;
+        }
+        
+    }
+    public class GitHubBranch
+    {
+        [JsonPropertyName("success")]
+        public bool success { get; set; }
+        [JsonPropertyName("timestamp")]
+        public int timestamp { get; set; }
+
+        [JsonPropertyName("base")]
+        public string? _base { get; set; }
+
+        [JsonPropertyName("date")]
+        public DateTime date { get; set; }
+
+        [JsonPropertyName("rates")]
+        public Dictionary<string, double>? rates { get; set; }
+
+    
+    }
+}
